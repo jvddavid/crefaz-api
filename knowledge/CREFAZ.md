@@ -750,6 +750,556 @@ O browser MCP revelou a lista de documentos da jornada do produto Energia.
 - PUT - Finalizar Proposta / Atualizar Proposta
   https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/put-finalizar-proposta-atualizar-proposta-RZawnPzOMp
 
+### POST - Criar Proposta/Pre-Analise
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/post-criar-propostapre-analise-cygoF57q4E
+
+Endpoint:
+/api/v2/propostas/pre-analise
+
+Observacoes da pagina:
+- Rota assincrona
+- Endpoint usado para criar uma nova proposta de credito dentro da Crefaz
+- Primeira validacao no motor de credito, indicando se o cliente esta pre-aprovado ou nao
+
+Exemplo request documentado:
+
+```json
+{
+  "cliente": {
+    "cpf": "12345678911",
+    "nome": "Jose Silva Santos",
+    "nascimento": "1974-07-10"
+  },
+  "profissional": {
+    "ocupacaoId": 1
+  },
+  "contato": {
+    "telefone": "449999699999"
+  },
+  "endereco": {
+    "logradouro": "Rua Rui Barbosa",
+    "bairro": "Limoeiro",
+    "cep": "63080000",
+    "cidadeId": "1762"
+  },
+  "operacao": {
+    "urlNotificacao": "null"
+  }
+}
+```
+
+Exemplo response sucesso do endpoint:
+
+```json
+{
+  "success": true,
+  "data": {
+    "processo": {
+      "id": 2603,
+      "mensagem": "Informacoes recebidas. Voce sera notificado via webhook quando o processamento for concluido"
+    },
+    "proposta": {
+      "id": 707770
+    }
+  },
+  "errors": null
+}
+```
+
+Exemplo response sucesso via webhook:
+
+```json
+{
+  "evento": {
+    "nome": "processo",
+    "id": 1,
+    "status": "mensagem de status",
+    "mensagens": ["mensagens de info / erros"],
+    "detalhes": {
+      "proposta": {
+        "id": 7000307,
+        "aprovado": true
+      }
+    }
+  }
+}
+```
+
+Campos descritos na pagina:
+- cliente.cpf: string, obrigatorio
+- cliente.nome: string, obrigatorio
+- cliente.nascimento: string, obrigatorio
+- profissional.ocupacaoId: int, obrigatorio
+- contato.telefone: string, obrigatorio
+- endereco.logradouro: string, nao obrigatorio
+- endereco.bairro: string, nao obrigatorio
+- endereco.cep: string, nao obrigatorio
+- endereco.cidadeId: int, obrigatorio
+- operacao.urlNotificacao: string, obrigatorio
+
+### GET - Listar Produtos/Ofertas Disponiveis
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/get-listar-produtosofertas-disponiveis-BqIbbSxDUF
+
+Endpoint:
+/api/v2/propostas/{id}/produtos-ofertados
+
+Observacoes da pagina:
+- Lista todos os produtos disponiveis para a proposta obtida
+- Traz dados adicionais dos produtos, quando houver
+- A documentacao chama atencao para o campo valorRendaPresumida no final do response, necessario nas proximas rotas
+
+Exemplo request:
+- https://api-externo-stag.crefazon.com.br/api/v2/Propostas/1028773808/produtos-ofertados
+
+Exemplo response sucesso:
+- retorna produtos, convenios, dados adicionais, tabelas de juros, dias de recebimento e bloqueios
+- o exemplo da pagina mostra produtos como Energia e CP Auto
+- o objeto proposta no response inclui cpf, nome e valorRendaPresumida
+
+### POST - Calcular Vencimento
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/post-calcular-vencimento-TR769mQei2
+
+Endpoint:
+api/v2/propostas/{id}/calculo-vencimento
+
+Observacoes da pagina:
+- Responsavel por calcular o primeiro vencimento disponivel para a proposta
+- Vencimentos diferem de acordo com as regras de cada produto
+
+Exemplo request:
+
+```json
+{
+  "produto": {
+    "id": 6,
+    "convenio": {
+      "id": 5041
+    },
+    "tabelaJuros": {
+      "id": 477
+    }
+  },
+  "operacao": {
+    "vencimento": null,
+    "diaRecebimentoId": -5
+  }
+}
+```
+
+Exemplo response sucesso:
+
+```json
+{
+  "success": true,
+  "data": {
+    "vencimento": [
+      {
+        "data": "2025-12-11"
+      }
+    ]
+  },
+  "errors": null
+}
+```
+
+Campos descritos na pagina:
+- produto.id: int, obrigatorio
+- convenio.id: int, obrigatorio
+- tabelaJuros.id: int, obrigatorio
+- operacao.vencimento: string, obrigatorio, enviar null
+- operacao.diaRecebimentoId: int, nao obrigatorio
+
+### POST - Consultar Valor Limite Cliente
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/post-consultar-valor-limite-cliente-WnB614Nf7K
+
+Endpoint:
+api/v2/propostas/{id}/limite-credito
+
+Observacoes da pagina:
+- Retorna o valor limite que o cliente pode solicitar de credito
+- Inclui valor total maximo e valor maximo da parcela
+
+Exemplo request:
+
+```json
+{
+  "produto": {
+    "id": 6,
+    "convenio": {
+      "id": 5
+    },
+    "tabelaJuros": {
+      "id": 326
+    }
+  },
+  "operacao": {
+    "diaRecebimentoId": -5,
+    "valorRenda": 2028.02,
+    "recalculo": null,
+    "vencimento": "2026-01-05"
+  }
+}
+```
+
+Exemplo response sucesso:
+
+```json
+{
+  "success": true,
+  "data": {
+    "valorLimite": {
+      "valorMaximoSolicitado": 2890.97,
+      "valorMaximoParcela": 507.01,
+      "valorMinimoParcela": 0.0
+    }
+  },
+  "errors": null
+}
+```
+
+Campos descritos na pagina:
+- produto.id: int, obrigatorio
+- convenio.id: int, obrigatorio
+- tabelaJuros.id: int, obrigatorio
+- operacao.vencimento: string, obrigatorio
+- operacao.diaRecebimentoId: int, nao obrigatorio
+- operacao.valorRenda: int, obrigatorio
+- operacao.recalculo: string, nao obrigatorio
+
+### POST - Simular Oferta Cliente
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/post-simular-oferta-cliente-fO58FYAMlg
+
+Endpoint:
+api/v2/propostas/{id}/simulacao-credito
+
+Observacoes da pagina:
+- Traz o valor da parcela e a quantidade de prestacoes de acordo com o valor solicitado
+
+Exemplo request:
+
+```json
+{
+  "produto": {
+    "id": 6,
+    "convenio": {
+      "id": 5041
+    },
+    "tabelaJuros": {
+      "id": 477
+    }
+  },
+  "operacao": {
+    "vencimento": "2025-12-11",
+    "diaRecebimentoId": -5,
+    "valor": 1800,
+    "valorRenda": 1518.0,
+    "tipoCalculo": 0
+  }
+}
+```
+
+Exemplo response sucesso:
+
+```json
+{
+  "success": true,
+  "data": {
+    "proposta": {
+      "id": 6,
+      "tipoCalculo": 0,
+      "tabelaJuros": {
+        "id": 477
+      },
+      "operacao": {
+        "valorSolicitado": 1800.0,
+        "valorParcela": null
+      },
+      "prazoValor": [
+        {
+          "prazo": 24,
+          "valorParcela": 270.57
+        },
+        {
+          "prazo": 22,
+          "valorParcela": 274.35
+        }
+      ]
+    }
+  },
+  "errors": null
+}
+```
+
+Campos descritos na pagina:
+- produto.id: int, obrigatorio
+- convenio.id: int, obrigatorio
+- tabelaJuros.id: int, obrigatorio
+- operacao.vencimento: string, obrigatorio
+- operacao.diaRecebimentoId: int, nao obrigatorio
+- operacao.valor: int, obrigatorio
+- operacao.valorRenda: int, obrigatorio
+- operacao.tipoCalculo: int, obrigatorio
+
+Regra de negocio documentada:
+- tipoCalculo aceita 2 valores possiveis, validados na rota de contexto GET - Proposta
+- tipoCalculo = 0: simula os valores de parcela de acordo com o valor total contratado
+- tipoCalculo = 1: simula de acordo com o valor de parcela desejado pelo cliente
+
+### PUT - Selecionar Oferta Cliente
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/put-selecionar-oferta-cliente-cJopuWfsCV
+
+Endpoint:
+/api/v2/propostas/{id}/produtos-ofertados/{produtoId}
+
+Observacoes da pagina:
+- Rota assincrona
+- Seleciona o valor de prestacao e a quantidade de parcelas do cliente
+- Informa os dados da fatura de energia do cliente
+- Ocorre a segunda validacao do cliente no Motor de Credito
+
+Exemplo request:
+
+```json
+{
+  "produto": {
+    "convenio": {
+      "id": 5041,
+      "dadosAdicionais": [
+        {
+          "convenioDadosId": 22089,
+          "valor": "1804030",
+          "convenioId": 5041
+        },
+        {
+          "convenioDadosId": 22090,
+          "valor": "2025-09-04",
+          "convenioId": 5041
+        }
+      ]
+    }
+  },
+  "operacao": {
+    "tabelaJuros": {
+      "id": 477
+    },
+    "prazo": 0,
+    "valorParcela": 0,
+    "valorRenda": 0,
+    "diaRecebimento": 0,
+    "tipoRenda": 0,
+    "vencimento": "2025-11-18",
+    "valorSolicitado": 0,
+    "tipoCalculo": 0
+  }
+}
+```
+
+Exemplo response sucesso do endpoint:
+
+```json
+{
+  "success": true,
+  "data": {
+    "processo": {
+      "id": 1283,
+      "mensagem": "Informacoes recebidas. Voce sera notificado via webhook quando o processamento for concluido"
+    }
+  },
+  "errors": null
+}
+```
+
+Exemplo response sucesso via webhook:
+
+```json
+{
+  "evento": {
+    "id": 1283,
+    "nome": "processo",
+    "status": "sucesso",
+    "mensagens": ["Processado com sucesso!"],
+    "detalhes": {
+      "proposta": {
+        "id": 1028773808,
+        "aprovado": true,
+        "novoLimite": {
+          "valorLimiteSolicitado": 1800,
+          "valorLimiteParcela": 326.65,
+          "valorLimiteMinimoParcela": 63.59
+        }
+      }
+    }
+  }
+}
+```
+
+Regra de negocio documentada:
+- o objeto adicionais deve ser enviado no request sempre que o produto for Energia
+- esses dados sao obtidos no endpoint GET - Listar Produtos/Ofertas Disponiveis
+- convenioDadosId representa os dados obrigatorios exigidos pela companhia de energia
+- esse valor e extraido da fatura do cliente e usado pela Crefaz para inserir a cobranca diretamente na conta de energia
+
+### POST - Listar Documentos Para Anexar
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/post-listar-documentos-para-anexar-zYUvEzeuR6
+
+Endpoint:
+/api/v2/Propostas/tipos-documentos
+
+Observacoes da pagina:
+- Lista os documentos obrigatorios para serem anexados na proposta
+- Para o produto Energia, a pagina cita documento de identificacao e fatura de energia recente do cliente
+
+Exemplo request:
+
+```json
+{
+  "proposta": {
+    "id": 1028773808
+  },
+  "operacao": {
+    "tipoModalidade": 2,
+    "tipoRenda": 0
+  }
+}
+```
+
+Exemplo response sucesso:
+
+```json
+{
+  "success": true,
+  "data": {
+    "documentosProduto": [
+      {
+        "id": 1,
+        "produto": {
+          "id": 6
+        },
+        "nome": "DOCUMENTO DE IDENTIFICACAO",
+        "obrigatorio": true
+      },
+      {
+        "id": 48,
+        "produto": {
+          "id": 6
+        },
+        "nome": "FATURA DE ENERGIA",
+        "obrigatorio": true
+      }
+    ]
+  },
+  "errors": null
+}
+```
+
+Campos descritos na pagina:
+- produto.id: int, obrigatorio
+- operacao.tipoModalidade: int, obrigatorio
+- operacao.tipoRenda: int, nao obrigatorio
+
+### PUT - Upload Documentos Proposta
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/put-upload-documentos-proposta-QiMvZWzJjY
+
+Endpoint:
+/api/v2/propostas/{id}/documento
+
+Observacoes da pagina:
+- Efetua o upload de arquivos em Base64
+- E necessario utilizar o prefixo data:image/png;base64, antes do conteudo codificado
+
+Exemplo request:
+
+```json
+{
+  "documento": {
+    "id": 1,
+    "conteudo": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg....."
+  }
+}
+```
+
+Exemplo response sucesso:
+
+```json
+{
+  "success": true,
+  "data": {
+    "mensagem": "Upload Concluido"
+  },
+  "errors": null
+}
+```
+
+Campos descritos na pagina:
+- documento.id: int, obrigatorio
+- documento.conteudo: string, obrigatorio
+
+### PUT - Finalizar Proposta / Atualizar Proposta
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/put-finalizar-proposta-atualizar-proposta-RZawnPzOMp
+
+Endpoint:
+/api/v2/propostas/{id}/proposta-credito
+
+Observacoes da pagina:
+- Rota assincrona
+- Completa o envio de dados na proposta
+- Preenche o restante das informacoes sobre o cliente
+
+Exemplo response sucesso do endpoint:
+
+```json
+{
+  "success": true,
+  "data": {
+    "processo": {
+      "id": 1301,
+      "mensagem": "Informacoes recebidas. Voce sera notificado via webhook quando o processamento for concluido"
+    }
+  },
+  "errors": null
+}
+```
+
+Exemplo response sucesso via webhook:
+
+```json
+{
+  "evento": {
+    "id": 1301,
+    "nome": "processo",
+    "status": "sucesso",
+    "mensagens": ["sucesso"],
+    "detalhes": null
+  }
+}
+```
+
+Campos descritos na pagina incluem, entre outros:
+- proposta.cliente.nome, rg, rgEmissor, rgUfId, rgEmissao, sexo, estadoCivil, nacionalidadeId, naturalidadeUfId, naturalidadeCidadeId, grauInstrucaoId, nomeMae, nomeConjuge, pep
+- proposta.contatos.contato.email, telefone, telefoneExtra
+- proposta.contatos.referencia.id, nome, telefone, grau
+- proposta.endereco.cep, logradouro, numero, bairro, complemento, cidadeId
+- proposta.bancario.bancoId, agencia, digito, numero e demais campos bancarios
+- proposta.profissional, proposta.unidade e proposta.operacao conforme exemplo completo da pagina
+
 ---
 
 ## Credito do Trabalhador
@@ -785,6 +1335,501 @@ O browser MCP revelou a lista de documentos da jornada do produto Credito do Tra
   https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/get-consulta-link-assinatura-W87tSGir76
 - Reapresentacao de Pagamento
   https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/reapresentacao-de-pagamento-o2RVrdhl2f
+
+### POST - Criar Proposta/Pre-Analise
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/post-criar-propostapre-analise-3WWb6YsvEl
+
+Endpoint:
+/api/v2/propostas/pre-analise
+
+Observacoes da pagina:
+- Rota assincrona
+- Endpoint usado para criar uma nova proposta de credito dentro da Crefaz
+- Primeira validacao no motor de credito, indicando se o cliente esta pre-aprovado ou nao
+- Para este produto, a pagina orienta enviar profissional.ocupacaoId = 1
+
+Exemplo response sucesso do endpoint:
+
+```json
+{
+  "success": true,
+  "data": {
+    "processo": {
+      "id": 3962,
+      "mensagem": "Informacoes recebidas. Voce sera notificado via webhook quando o processamento for concluido"
+    },
+    "proposta": null
+  },
+  "errors": null
+}
+```
+
+Campos descritos na pagina:
+- cliente.cpf, cliente.nome, cliente.nascimento: obrigatorios
+- profissional.ocupacaoId: obrigatorio
+- contato.telefone: obrigatorio
+- endereco.logradouro, bairro, cep: nao obrigatorios
+- endereco.cidadeId: obrigatorio
+- operacao.urlNotificacao: obrigatorio
+
+### GET - Listar Produtos/Ofertas Disponiveis
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/get-listar-produtosofertas-disponiveis-oK3HOaZOiI
+
+Endpoint:
+/api/v2/propostas/{id}/produtos-ofertados
+
+Observacoes da pagina:
+- Lista os produtos disponiveis para a proposta obtida
+- Traz dados adicionais, quando houver
+- O exemplo mostra Consignado Privado com controleRenda = 1 e valorRendaPresumida na proposta
+
+### POST - Autorizacao/Consulta Cliente
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/post-autorizacaoconsulta-cliente-fKhZ2pXF0a
+
+Endpoint:
+/api/v2/propostas/{id}/autorizacao-consulta
+
+Observacoes da pagina:
+- Rota assincrona
+- Coleta a autorizacao do cliente para consulta de margem no DataPrev
+- Consulta a margem do cliente no DataPrev
+- Aciona o motor de credito para validacao de politicas
+
+Exemplo request:
+
+```json
+{
+  "contato": {
+    "telefone": "2199462000"
+  }
+}
+```
+
+Observacoes sobre contato.telefone:
+- Deve ser informado o telefone real do cliente, que recebera o SMS de autorizacao
+- Evitar numeros randomizados, pois isso impacta o fluxo da proposta
+
+Exemplo response sucesso do endpoint:
+
+```json
+{
+  "success": true,
+  "data": {
+    "processo": {
+      "id": 3532,
+      "mensagem": "Informacoes recebidas. Voce sera notificado via webhook quando o processamento for concluido"
+    },
+    "proposta": {
+      "id": 707770
+    }
+  },
+  "errors": null
+}
+```
+
+Fluxo de webhooks documentado:
+- O endpoint pode gerar multiplas respostas de webhook
+- Processos listados: coleta da autorizacao, consulta de margem no Dataprev, consulta ao motor de credito
+- O webhook final de sucesso traz valorRendaPresumida e tabelaJuros, informacoes obrigatorias para as rotas seguintes
+
+Regras de negocio documentadas:
+- Deve ser acionado apos GET /api/v2/propostas/{id}/produtos-ofertados e antes de PUT /api/v2/propostas/{id}/produtos-ofertados/{produtoId}
+- O sistema valida se o telefone informado ja esta vinculado a autorizacao ativa de CPF diferente
+- Se o cliente ja tiver autorizacao vigente, o sistema pula direto para a consulta de margem
+- Se nao tiver, envia SMS e a proposta fica em Selecao de Ofertas ate o cliente concluir a autorizacao
+- Se Consignado Privado for o unico produto e for negado, a proposta vai para status NEGADA
+- Se houver outros produtos, o status nao muda e o sistema apenas informa a negativa via webhook
+
+Campo descrito na pagina:
+- contato.telefone: string, obrigatorio
+
+### POST - Calcular Vencimento
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/post-calcular-vencimento-OqdGNsiBZI
+
+Endpoint:
+api/v2/propostas/{id}/calculo-vencimento
+
+Observacoes da pagina:
+- Responsavel por calcular o primeiro vencimento disponivel para a proposta
+- Vencimentos diferem de acordo com as regras de cada produto
+- Para este produto, convenio.id deve ser enviado como null
+- tabelaJuros.id e obtido no webhook da rota POST - Autorizacao/Consulta Cliente
+
+Exemplo request:
+
+```json
+{
+  "produto": {
+    "id": 4,
+    "convenio": {
+      "id": null
+    },
+    "tabelaJuros": {
+      "id": 521
+    }
+  },
+  "operacao": {
+    "vencimento": null,
+    "diaRecebimentoId": -5
+  }
+}
+```
+
+Exemplo response sucesso:
+
+```json
+{
+  "success": true,
+  "data": {
+    "vencimento": [
+      {
+        "data": "2026-05-23"
+      }
+    ]
+  },
+  "errors": null
+}
+```
+
+Campos descritos na pagina:
+- produto.id: int, obrigatorio
+- convenio.id: int, enviar null
+- tabelaJuros.id: int, obrigatorio
+- operacao.vencimento: string, enviar null
+- operacao.diaRecebimentoId: int, nao obrigatorio
+
+### POST - Consultar Valor Limite Cliente
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/post-consultar-valor-limite-cliente-VwyEixCfiZ
+
+Endpoint:
+api/v2/propostas/{id}/limite-credito
+
+Observacoes da pagina:
+- Retorna o valor limite que o cliente pode solicitar de credito
+- Inclui valor total maximo e valor maximo da parcela
+- Para este produto, convenio.id deve ser enviado null
+- valorRenda e tabelaJuros sao obtidos no webhook da rota POST - Autorizacao/Consulta Cliente
+
+Exemplo response sucesso:
+
+```json
+{
+  "success": true,
+  "data": {
+    "valorLimite": {
+      "valorMaximoSolicitado": 25000.0,
+      "valorMaximoParcela": 1413.78,
+      "valorMinimoParcela": 1.0
+    }
+  },
+  "errors": null
+}
+```
+
+Campos descritos na pagina:
+- produto.id: int, obrigatorio
+- convenio.id: int, enviar null
+- tabelaJuros.id: int, obrigatorio
+- operacao.vencimento: string, obrigatorio
+- operacao.diaRecebimentoId: int, nao obrigatorio
+- operacao.valorRenda: int, obrigatorio
+- operacao.recalculo: string, enviar null
+
+### POST - Simular Oferta Cliente
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/post-simular-oferta-cliente-E4jstQOqWf
+
+Endpoint:
+api/v2/propostas/{id}/simulacao-credito
+
+Observacoes da pagina:
+- Retorna as quantidades de parcelas de acordo com o valor selecionado
+- Rota de simulacao para apresentar ao cliente os valores que ele pode solicitar
+- Para este produto, tipoCalculo deve ser sempre 0
+- convenio.id deve ser enviado null
+
+Exemplo response sucesso:
+
+```json
+{
+  "success": true,
+  "data": {
+    "proposta": {
+      "id": 4,
+      "tipoCalculo": 0,
+      "tabelaJuros": {
+        "id": 521
+      },
+      "operacao": {
+        "valorSolicitado": 25000.0,
+        "prazoValor": [
+          {
+            "prazo": 48,
+            "valorParcela": 1076.02
+          },
+          {
+            "prazo": 47,
+            "valorParcela": 1086.11
+          }
+        ]
+      }
+    }
+  },
+  "errors": null
+}
+```
+
+Campos descritos na pagina:
+- produto.id: int, obrigatorio
+- convenio.id: int, enviar null
+- tabelaJuros.id: int, obrigatorio
+- operacao.vencimento: string, obrigatorio
+- operacao.diaRecebimentoId: int, nao obrigatorio
+- operacao.valor: int, obrigatorio
+- operacao.valorRenda: int, obrigatorio
+- operacao.tipoCalculo: int, enviar 0
+
+### PUT - Selecionar Oferta Cliente
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/put-selecionar-oferta-cliente-da3ASTzXGL
+
+Endpoint:
+/api/v2/propostas/{id}/produtos-ofertados/{produtoId}
+
+Observacoes da pagina:
+- Rota assincrona
+- Seleciona a oferta desejada para o cliente
+- Define valor de parcela e quantidade de parcelas
+- Ocorre a segunda validacao no motor de credito
+
+Exemplo response sucesso do endpoint:
+
+```json
+{
+  "success": true,
+  "data": {
+    "processo": {
+      "id": 3956,
+      "mensagem": "Informacoes recebidas. Voce sera notificado via webhook quando o processamento for concluido"
+    },
+    "proposta": null
+  },
+  "errors": null
+}
+```
+
+Exemplo response sucesso via webhook:
+
+```json
+{
+  "evento": {
+    "id": 3958,
+    "nome": "processo",
+    "status": "sucesso",
+    "mensagens": ["Processado com sucesso!"],
+    "detalhes": {
+      "proposta": {
+        "id": 1028788920,
+        "aprovado": true,
+        "novoLimite": {
+          "valorLimiteSolicitado": 25000.0,
+          "valorLimiteParcela": 1413.78,
+          "valorLimiteMinimoParcela": 1.0
+        }
+      }
+    }
+  }
+}
+```
+
+Campos descritos na pagina:
+- produto.convenio.id: int, enviar null
+- produto.convenio.dadosAdicionais: enviar vazio
+- operacao.tabelaJuros.id: int, obrigatorio
+- operacao.prazo: int, obrigatorio
+- operacao.valorParcela: float, obrigatorio
+- operacao.valorRenda: float, obrigatorio
+- operacao.diaRecebimento: int, nao obrigatorio
+- operacao.tipoRenda: int, enviar 0
+- operacao.vencimento: string, obrigatorio
+- operacao.valorSolicitado: int, obrigatorio
+- operacao.tipoCalculo: int, enviar 0
+
+### PUT - Finalizar Proposta / Atualizar Proposta
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/put-finalizar-proposta-atualizar-proposta-4kqkwkVlUg
+
+Endpoint:
+/api/v2/propostas/{id}/proposta-credito
+
+Observacoes da pagina:
+- Rota assincrona
+- Completa o envio de dados da proposta
+- Preenche o restante das informacoes do cliente
+- Para este produto, tipoModalidade = 2, tipoRenda = 0 e tipoCalculo = 0
+
+Exemplo response sucesso do endpoint:
+
+```json
+{
+  "success": true,
+  "data": {
+    "processo": {
+      "id": 3970,
+      "mensagem": "Informacoes recebidas. Voce sera notificado via webhook quando o processamento for concluido"
+    },
+    "proposta": null
+  },
+  "errors": null
+}
+```
+
+Campos descritos na pagina incluem, entre outros:
+- proposta.cliente.nome, rg, rgEmissor, rgUfId, rgEmissao, sexo, estadoCivil, nacionalidadeId, naturalidadeUfId, naturalidadeCidadeId, grauInstrucaoId, nomeMae, nomeConjuge, pep
+- proposta.contatos.contato.email, telefone, telefoneExtra
+- proposta.contatos.referencia.id, nome, telefone, grau
+- proposta.endereco.cep, logradouro, numero, bairro, complemento, cidadeId
+- proposta.bancario.bancoId, agencia, digito, numero, conta, tipoConta, tempoConta
+- proposta.unidade.nomeVendedor, cpfVendedor, celularVendedor
+- proposta.operacao.produtoId, diaRecebimento, tipoModalidade, convenioId, vencimento, tabelaJurosId, valorSolicitado, prazo, valorParcela, valorRenda, tipoRenda, tipoCalculo
+
+### GET - Consulta Link Assinatura
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/get-consulta-link-assinatura-W87tSGir76
+
+Endpoint:
+/api/v2/propostas/{id}/link-assinatura
+
+Observacoes da pagina:
+- Captura o link para realizacao da biometria e assinatura do contrato
+- Exclusivo para o produto Credito do Trabalhador
+- A proposta deve estar no status Aguard. Assinatura
+- Se o link ainda estiver em geracao pela Unico, o endpoint pode retornar erro temporario
+- Apos a conclusao da assinatura, o link deixa de ser disponibilizado
+- A propostaId deve pertencer ao usuario autenticado
+
+Exemplo response sucesso:
+
+```json
+{
+  "success": true,
+  "data": {
+    "url": "https://cadastro.uat.unico.app/process/a970801b-2b23-4c28-b905-ba636c087386"
+  },
+  "errors": null
+}
+```
+
+Exemplo response erro:
+
+```json
+{
+  "success": false,
+  "data": {
+    "url": "Link Indisponivel no Momento"
+  },
+  "errors": null
+}
+```
+
+### Reapresentacao de Pagamento
+
+URL:
+https://docs.cfzsistemas.com.br/s/a344fcb8-d5fb-494f-a1df-4276392be4b6/doc/reapresentacao-de-pagamento-o2RVrdhl2f
+
+Texto visivel recuperado:
+- O fluxo so deve ocorrer quando a proposta receber o status Pagamento Pendente
+- Esse status ocorre quando algum dado bancario enviado em PUT - Finalizar Proposta / Atualizar Proposta esta incorreto ou inconsistente
+
+Webhook de exemplo:
+
+```json
+{
+  "evento": {
+    "nome": "atualizacao-status-proposta",
+    "detalhes": {
+      "proposta": {
+        "id": 1028792712,
+        "situacaoDescricao": {
+          "nome": "Pagamento Pendente"
+        }
+      }
+    }
+  }
+}
+```
+
+Passos documentados:
+1. Acionar a rota GET /api/v2/propostas/{id}/dados-bancarios para verificar os dados enviados
+2. Identificar o dado incorreto e corrigi-lo
+3. Acionar a rota POST /api/v2/propostas/{id}/dados-bancarios para corrigir o dado inconsistente
+
+Exemplo response GET dados bancarios:
+
+```json
+{
+  "bancario": {
+    "bancoId": "237",
+    "agencia": "1234",
+    "digito": "7",
+    "numero": "56789-x",
+    "conta": "0",
+    "tipoConta": "2",
+    "tempoConta": "0"
+  },
+  "mensagem": null
+}
+```
+
+Exemplo request POST de correcao:
+
+```json
+{
+  "bancario": {
+    "bancoId": "237",
+    "agencia": "1234",
+    "digito": "2",
+    "numero": "56789-x",
+    "conta": "0",
+    "tipoConta": "2",
+    "tempoConta": "0"
+  }
+}
+```
+
+Exemplo response sucesso da correcao:
+
+```json
+{
+  "success": true,
+  "data": {
+    "mensagem": "Dados bancarios atualizados com sucesso"
+  },
+  "errors": null
+}
+```
+
+Mensagens da API documentadas:
+- Sucesso: Dados bancarios enviados com sucesso.
+- ID inexistente: Proposta invalida.
+- Sem permissao: A proposta nao pertence ao seu usuario!
+- Proposta encerrada: Nao e possivel realizar essa acao. Proposta ja cancelada ou negada
+- Etapa bloqueada: Nao e possivel enviar os dados bancarios: o status atual nao permite edicao.
+- Banco invalido: Banco invalido ou inativo.
 
 ---
 
