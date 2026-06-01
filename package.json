@@ -1,0 +1,57 @@
+{
+  "name": "@jvddavid/crefaz-api",
+  "version": "2.0.0",
+  "license": "PRIVATE",
+  "description": "An API for Crefaz, a Brazilian credit bureau. This API provides access to credit reports, scores, and other related information.",
+  "private": false,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "keywords": [
+    "crefaz",
+    "api",
+    "crefaz-api"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jvddavid/crefaz-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jvddavid/crefaz-api/issues"
+  },
+  "homepage": "https://github.com/jvddavid/crefaz-api#readme",
+  "type": "module",
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "@types/node": "^25.9.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "prepublishOnly": "npm run typecheck && npm run lint && npm run test",
+    "start": "node src/index.ts",
+    "lint": "biome lint src tests",
+    "lint:fix": "biome lint --write src tests",
+    "format": "biome format --write src tests",
+    "format:check": "biome format src tests",
+    "typecheck": "tsc --noEmit",
+    "dev": "node --watch src/index.ts",
+    "test": "",
+    "test:watch": "",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major",
+    "release:patch": "npm run version:patch && git push --follow-tags",
+    "release:minor": "npm run version:minor && git push --follow-tags",
+    "release:major": "npm run version:major && git push --follow-tags",
+    "publish:github": "pnpm publish --registry https://npm.pkg.github.com",
+    "login:github": "npm login --registry=https://npm.pkg.github.com"
+  },
+  "dependencies": {},
+  "optionalDependencies": {},
+  "packageManager": "pnpm@11.5.0",
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  }
+}

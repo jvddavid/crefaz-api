@@ -1,0 +1,51 @@
+# Arquivos de desenvolvimento
+src/
+tests/
+scripts/
+.github/
+*.test.*
+*.spec.*
+
+# Manter arquivo de exemplo
+!.npmrc.example
+
+# Configurações
+.eslintrc*
+eslint.config.*
+tsconfig*.json
+vitest.config.*
+vite.config.*
+
+# Arquivos temporários
+*.log
+*.tmp
+.cache/
+.temp/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git*
+
+# Dependências
+node_modules/
+
+# Build artifacts (exceto dist)
+coverage/
+.nyc_output/
+
+# Docker
+Dockerfile*
+docker-compose*
+
+# Outros
+*.tgz
+*.tar.gz

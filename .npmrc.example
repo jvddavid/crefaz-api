@@ -1,0 +1,12 @@
+# Exemplo de configuração .npmrc para usar este pacote
+# Copie estas linhas para seu arquivo ~/.npmrc local
+# Substitua SEU_GITHUB_TOKEN pelo seu token de acesso pessoal
+
+@obhyper:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=SEU_GITHUB_TOKEN
+
+# Como criar um token:
+# 1. Vá para https://github.com/settings/tokens
+# 2. Clique em "Generate new token (classic)"
+# 3. Selecione o escopo "read:packages"
+# 4. Copie o token gerado e substitua SEU_GITHUB_TOKEN acima
