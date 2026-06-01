@@ -5,6 +5,7 @@ import {
   NetworkError,
   ProviderBusinessError,
   ProviderContractError,
+  RateLimitError,
   TimeoutError,
   ValidationError,
 } from './errors.js'
@@ -172,6 +173,10 @@ export class HttpClient {
 
     if (input.statusCode === 422) {
       throw new ProviderBusinessError(message, context)
+    }
+
+    if (input.statusCode === 429) {
+      throw new RateLimitError(message, context)
     }
 
     throw new ProviderBusinessError(message, context)

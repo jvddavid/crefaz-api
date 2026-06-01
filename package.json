@@ -1,9 +1,28 @@
 {
   "name": "@jvddavid/crefaz-api",
-  "version": "2.0.0",
-  "license": "PRIVATE",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
   "description": "An API for Crefaz, a Brazilian credit bureau. This API provides access to credit reports, scores, and other related information.",
   "private": false,
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      }
+    }
+  },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"
@@ -25,15 +44,18 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
     "@types/node": "^25.9.1",
+    "pkgroll": "^2.27.1",
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "prepublishOnly": "npm run typecheck && npm run lint && npm run test",
+    "generate:cities": "node scripts/generate-city-constants.mjs",
+    "build": "pnpm run generate:cities && pkgroll --clean-dist",
+    "prepack": "pnpm run lint && pnpm run typecheck && pnpm run build",
     "start": "node src/index.ts",
-    "lint": "biome lint src tests",
-    "lint:fix": "biome lint --write src tests",
-    "format": "biome format --write src tests",
-    "format:check": "biome format src tests",
+    "lint": "biome lint src",
+    "lint:fix": "biome lint --write src",
+    "format": "biome format --write src",
+    "format:check": "biome format src",
     "typecheck": "tsc --noEmit",
     "dev": "node --watch src/index.ts",
     "test": "",

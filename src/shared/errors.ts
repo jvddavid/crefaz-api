@@ -26,11 +26,15 @@ export class AuthenticationError extends CrefazApiError {}
 
 export class AuthorizationError extends CrefazApiError {}
 
+export class RateLimitError extends CrefazApiError {}
+
 export class ValidationError extends CrefazApiError {}
 
 export class ProviderBusinessError extends CrefazApiError {}
 
 export class ProviderContractError extends CrefazApiError {}
+
+export class UnexpectedProviderStateError extends CrefazApiError {}
 
 export class NetworkError extends CrefazApiError {}
 
