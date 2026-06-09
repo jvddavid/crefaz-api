@@ -2,7 +2,7 @@
 # Copie estas linhas para seu arquivo ~/.npmrc local
 # Substitua SEU_GITHUB_TOKEN pelo seu token de acesso pessoal
 
-@obhyper:registry=https://npm.pkg.github.com
+@jvddavid:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=SEU_GITHUB_TOKEN
 
 # Como criar um token:

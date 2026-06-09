@@ -1,0 +1,151 @@
+# @jvddavid/crefaz-api
+
+TypeScript SDK for the Crefaz Parceiro V2 API.
+
+## Summary
+
+- Runtime: Node.js 24+
+- Language: TypeScript 5
+- Module system: ESM-first package with CJS exports
+- Package manager: pnpm
+- Main facade: `CrefazClient`
+- Public surface: `src/index.ts`
+
+## Documentation intent
+
+This file exists to help document how to use the SDK, not to describe internal contributor workflows.
+When generating docs, prioritize installation, authentication, proposal flow, webhook handling, polling fallback, exported operations, and public error handling.
+
+## Installation
+
+Package name: `@jvddavid/crefaz-api`
+
+GitHub Packages setup:
+- `@jvddavid:registry=https://npm.pkg.github.com`
+- `//npm.pkg.github.com/:_authToken=SEU_GITHUB_TOKEN`
+
+Install with:
+- `pnpm add @jvddavid/crefaz-api`
+
+## Use this library for
+
+- authenticating with Crefaz using `login`, `senha`, and `apiKey`
+- starting asynchronous proposal operations
+- polling processing status with fallback behavior
+- parsing webhook notifications into stable exported types
+- accessing generated local city helpers
+- handling normalized SDK errors instead of raw provider failures
+
+## Typical usage flow
+
+1. Create `CrefazClient` with `credentials`.
+2. Authenticate implicitly through client methods or explicitly with `authenticate()`.
+3. Call proposal or lookup operations.
+4. For async routes, persist `processo.id` from the accepted response.
+5. Receive final payload via webhook.
+6. Use `getProcessingStatus()` or `waitForProcessing()` as fallback.
+
+## Public exports
+
+Main runtime exports:
+- `CrefazClient`
+- `crefazBaseUrls`
+- `parseWebhookNotification`
+- `crefazCitiesByUf`
+- `findLocalCityByNameAndUf`
+- `findLocalCityIdByNameAndUf`
+
+Main client operations:
+- `authenticate(forceRefresh?)`
+- `getAccessToken()`
+- `preAnalyseProposal(payload)`
+- `selectOfferedProduct(proposalId, productId, payload)`
+- `submitCreditProposal(proposalId, payload)`
+- `consultVehicleOfferedProducts(proposalId, payload)`
+- `authorizeMarginConsultation(proposalId, payload)`
+- `findCities(payload)`
+- `listCountries()`
+- `listOfferedProducts(proposalId)`
+- `calculateDueDate(proposalId, payload)`
+- `getCreditLimit(proposalId, payload)`
+- `simulateOffer(proposalId, payload)`
+- `listRequiredDocuments(payload)`
+- `uploadProposalDocument(proposalId, payload)`
+- `getSignatureLink(proposalId)`
+- `getProposalBankData(proposalId)`
+- `updateProposalBankData(proposalId, payload)`
+- `cancelProposal(proposalId)`
+- `getProcessingStatus(processId)`
+- `waitForProcessing(processId, options?)`
+
+Selected public types:
+- `CrefazCredentials`
+- `CrefazAuthentication`
+- `AcceptedProcessResponse`
+- `FindCitiesResponse`
+- `ListCountriesResponse`
+- `CreditLimitResponse`
+- `SimulateOfferResponse`
+- `RequiredDocumentsResponse`
+- `WebhookNotification`
+- `WebhookEvent`
+- `PollingOptions`
+
+Exported error classes:
+- `AuthenticationError`
+- `AuthorizationError`
+- `CrefazApiError`
+- `NetworkError`
+- `ProviderBusinessError`
+- `ProviderContractError`
+- `RateLimitError`
+- `TimeoutError`
+- `UnexpectedProviderStateError`
+- `ValidationError`
+
+## Base URLs
+
+- homologacao: `https://api-externo-stag.crefazon.com.br/api/v2`
+- producao: `https://api-externo.crefazon.com.br/api`
+
+Default client base URL is homologation.
+
+## Behavioral notes
+
+- Critical proposal routes are asynchronous.
+- Async payloads must include `operacao.urlNotificacao`.
+- `waitForProcessing(processId, options?)` polls the fallback status endpoint.
+- Webhook parsing is available through `parseWebhookNotification`.
+- Token refresh is handled internally and deduplicated in the client.
+
+## Documentation rules
+
+- Describe only exported or implemented behavior.
+- Treat `src/index.ts` as the public API surface.
+- Prefer usage examples over architecture detail in end-user docs.
+- Mention current limitations honestly, including the missing automated `test` script.
+- When documenting async flows, mention both webhook-first delivery and polling fallback.
+
+## Generated data
+
+- `src/constants/cities.ts` is generated from `docs/cidade_uf.xlsx` by `scripts/generate-city-constants.mjs`.
+
+## Limitations
+
+- No implemented automated test script in `package.json`.
+- `start` and `dev` scripts do not verify SDK behavior.
+- Build depends on city constant generation.
+
+## Source of truth
+
+Read these files before documenting or changing behavior:
+- `package.json`
+- `src/index.ts`
+- `src/client.ts`
+- `knowledge/RUNTIME.md`
+- `knowledge/CREFAZ.md`
+
+Additional context:
+- `knowledge/ARCH.md`
+- `knowledge/EVENTS.md`
+- `knowledge/TESTS.md`
