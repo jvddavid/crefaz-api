@@ -250,6 +250,32 @@ pnpm run typecheck
 pnpm run build
 ````
 
+## Teste de homologação do fluxo Energia
+
+O repositório agora inclui um teste real com `node:test` para o fluxo de homologação do produto Energia até a etapa de retorno das ofertas.
+
+Execute com:
+
+````bash
+pnpm run test:homologacao:energia
+````
+
+Variáveis esperadas:
+
+- `CREFAZ_LOGIN`
+- `CREFAZ_SENHA`
+- `CREFAZ_API_KEY`
+- `CREFAZ_HOMOLOG_ENERGIA_PRE_ANALISE_PAYLOAD` com o JSON da pre-análise, ou `CREFAZ_HOMOLOG_ENERGIA_PRE_ANALISE_PAYLOAD_FILE` apontando para um arquivo JSON
+
+Variáveis opcionais:
+
+- `CREFAZ_BASE_URL` para sobrescrever a URL de homologação
+- `CREFAZ_HOMOLOG_POLLING_ATTEMPTS`
+- `CREFAZ_HOMOLOG_POLLING_INTERVAL_MS`
+- `CREFAZ_HOMOLOG_ENERGIA_NOME_PRODUTO` para ajustar o texto esperado na resposta de ofertas
+
+Quando as credenciais ou o payload não estiverem configurados, o teste é marcado como `skip` em vez de falhar.
+
 ## Referências
 
 - [knowledge/RUNTIME.md](knowledge/RUNTIME.md)
